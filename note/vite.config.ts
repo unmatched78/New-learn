@@ -1,17 +1,12 @@
-import type { Config } from 'tailwindcss'
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 
-export default {
-  content: [
-    './index.html',
-    './src/**/*.{vue,ts,tsx}',
-    './node_modules/flowbite/**/*.js',
-  ],
-  theme: {
-    extend: {},
-  },
+export default defineConfig({
   plugins: [
-    require('flowbite/plugin'),
+    vue(),
+    tailwindcss(),
   ],
-} satisfies Config
+})
 
 // https://vite.dev/config/
