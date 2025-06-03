@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheader',
     'rest_framework_simplejwt'.
-    'cloudinary'
+    'cloudinary',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
