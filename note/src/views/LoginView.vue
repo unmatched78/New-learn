@@ -2,7 +2,7 @@
 import { defineComponent, ref } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
+import { toast } from 'vue3-toastify';
 import { useForm, useField } from 'vee-validate'
 import { defineRule } from 'vee-validate'
 import { required, min } from '@vee-validate/rules'
