@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from .api.responses import error_response  # Import the helper
-
+from rest_framework.exceptions import PermissionDenied
 User = get_user_model()
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
