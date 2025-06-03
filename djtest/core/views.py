@@ -26,7 +26,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # --- Inject these claims into BOTH access & refresh tokens ---
+        # Inject these claims into BOTH access & refresh tokens 
         token['user_id']     = user.id
         return token
     
@@ -37,3 +37,31 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAdminUser]  # Only admins can manage users
+
+class NoteViewSet(viewsets.ModelViewSet):
+    serializer_class = NoteSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Note.objects.all()
+    def get_queryset(self):
+        # Return only the current user's notes
+        return Note.objects.filter(notewriter=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically set notewriter to current user
+        serializer.save(notewriter=self.request.user)
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        
