@@ -55,7 +55,7 @@
 import { defineComponent, ref } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
+import { toast } from 'vue3-toastify';
 
 export default defineComponent({
   name: 'RegisterView',
