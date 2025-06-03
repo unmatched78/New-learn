@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+import sys
+from datetime import timedelta
+from dotenv import load_dotenv
+load_dotenv()
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,8 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'core',
     'rest_framework',
-    'corsheader',
-    'rest_framework_simplejwt'.
+    'corsheaders',
+    'rest_framework_simplejwt',
     'cloudinary',
     'rest_framework_simplejwt.token_blacklist',
 ]
@@ -152,7 +157,7 @@ AUTH_USER_MODEL = 'core.CustomUser'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Django project settings.py
-
+CORS_ALLOW_ALL_ORIGINS =True
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -163,7 +168,6 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": settings.SECRET_KEY,
     "VERIFYING_KEY": "",
     "AUDIENCE": "user_id",
     "ISSUER": None,
