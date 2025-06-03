@@ -1,6 +1,63 @@
+<script lang="ts">
+import { defineComponent, ref, computed } from 'vue'
+import { useNotesStore } from '../stores/notes'
+import { useToast } from 'vue-toastification'
+import { QuillEditor } from '@vueup/vue-quill'
+import sanitizeHtml from 'sanitize-html'
+
+export default defineComponent({
+  components: { QuillEditor },
+  props: {
+    note: {
+      type: Object,
+      required: true,
+    },
+  },
+  setup(props) {
+    const notesStore = useNotesStore()
+    const toast = useToast()
+    const isEditing = ref(false)
+    const editContent = ref(props.note.content)
+
+    const sanitizedContent = computed(() =>
+      sanitizeHtml(props.note.content, {
+        allowedTags: ['b', 'i', 'u', 'p', 'strong', 'em', 'ul', 'li', 'ol'],
+        allowedAttributes: {},
+      })
+    )
+
+    const openEditModal = () => {
+      isEditing.value = true
+    }
+
+    const saveNote = async () => {
+      try {
+        await notesStore.updateNote(props.note.id, editContent.value)
+        isEditing.value = false
+        toast.success('Note updated successfully')
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to update note')
+      }
+    }
+
+    const deleteNote = async () => {
+      if (confirm('Are you sure you want to delete this note?')) {
+        try {
+          await notesStore.deleteNote(props.note.id)
+          toast.success('Note deleted successfully')
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to delete note')
+        }
+      }
+    }
+
+    return { isEditing, editContent, openEditModal, saveNote, deleteNote, sanitizedContent }
+  },
+})
+</script>
 <template>
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <div v-html="note.content" class="text-gray-900 dark:text-white mb-4"></div>
+    <div v-html="sanitizedContent" class="text-gray-900 dark:text-white mb-4"></div>
     <small class="text-gray-500">Created: {{ new Date(note.created_at).toLocaleString() }}</small>
     <div class="mt-4 flex space-x-2">
       <button
@@ -16,7 +73,6 @@
         Delete
       </button>
     </div>
-    <!-- Edit Modal -->
     <div
       v-if="isEditing"
       id="edit-modal"
@@ -51,53 +107,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { useNotesStore } from '../stores/notes'
-import { useToast } from 'vue-toastification'
-import { QuillEditor } from '@vueup/vue-quill'
-
-export default defineComponent({
-  components: { QuillEditor },
-  props: {
-    note: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup(props) {
-    const notesStore = useNotesStore()
-    const toast = useToast()
-    const isEditing = ref(false)
-    const editContent = ref(props.note.content)
-
-    const openEditModal = () => {
-      isEditing.value = true
-    }
-
-    const saveNote = async () => {
-      try {
-        await notesStore.updateNote(props.note.id, editContent.value)
-        isEditing.value = false
-        toast.success('Note updated successfully')
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to update note')
-      }
-    }
-
-    const deleteNote = async () => {
-      if (confirm('Are you sure you want to delete this note?')) {
-        try {
-          await notesStore.deleteNote(props.note.id)
-          toast.success('Note deleted successfully')
-        } catch (error: any) {
-          toast.error(error.message || 'Failed to delete note')
-        }
-      }
-    }
-
-    return { isEditing, editContent, openEditModal, saveNote, deleteNote }
-  },
-})
-</script>
