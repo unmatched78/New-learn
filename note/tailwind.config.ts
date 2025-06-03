@@ -5,12 +5,17 @@ export default {
   content: [
     './index.html',
     './src/**/*.{vue,ts,tsx}',
-    './node_modules/flowbite/**/*.js', // Include Flowbite's JS files for class scanning
+    './node_modules/flowbite/**/*.{js,ts}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#2563eb',
+        secondary: '#1f2937',
+      },
+    },
   },
   plugins: [
-    flowbite, // Use the imported Flowbite plugin
+    flowbite,
   ],
 } satisfies Config
