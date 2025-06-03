@@ -69,12 +69,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().handle_exception(exc)
 
 
+from rest_framework import viewsets, status, permissions
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from .models import Note
+from .serializers import NoteSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import PermissionDenied
+from .api.responses import error_response
+
+User = get_user_model()
+
 class NoteViewSet(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     queryset = Note.objects.all()
-    
+
     def get_queryset(self):
         # Return only the current user's notes
         return Note.objects.filter(notewriter=self.request.user)
@@ -82,17 +93,27 @@ class NoteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically set notewriter to current user
         serializer.save(notewriter=self.request.user)
-        
+
+    def perform_update(self, serializer):
+        # Ensure user can only update their own notes
+        if self.get_object().notewriter != self.request.user:
+            raise PermissionDenied("You can only edit your own notes")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        # Ensure user can only delete their own notes
+        if instance.notewriter != self.request.user:
+            raise PermissionDenied("You can only delete your own notes")
+        instance.delete()
+
     def handle_exception(self, exc):
-        # Custom exception handling for NoteViewSet
         if isinstance(exc, PermissionDenied):
             return error_response(
                 message="Permission denied",
                 code=status.HTTP_403_FORBIDDEN,
-                details={"error": "You don't have permission to access this note"}
+                details={"error": str(exc)}
             )
         return super().handle_exception(exc)
-
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
