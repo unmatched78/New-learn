@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Note
-
+from bleach import clean
 User = get_user_model()  
 # serializers.py
 from django.contrib.auth.password_validation import validate_password
@@ -52,12 +52,6 @@ class AuthResponseSerializer(serializers.Serializer):
     tokens = serializers.DictField(child=serializers.CharField())
     user = UserSerializer()
 
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Note
-from bleach import clean
-
-User = get_user_model()
 
 class NoteSerializer(serializers.ModelSerializer):
     notewriter = serializers.SerializerMethodField()
