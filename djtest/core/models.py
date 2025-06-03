@@ -19,10 +19,9 @@ class CustomUser(AbstractUser):
         return f"{self.username} --{self.role}."
 
 class Note(Timer):
-    notewriter=models.Foreignkey(CustomUser, on_delete=models.set_null, related_name="notewriter")
+    notewriter=models.Foreignkey(CustomUser, on_delete=models.set_null, blank=True, null=True, related_name="notewriter")
     note=models.TextField()
     def __str__(self):
-        return f"{self.note[:20]} by {self.notewriter.username}"
-
+        return f"{self.note[:20]} by {self.notewriter.username if self.notewriter else 'Anonymous'}"
 
     
