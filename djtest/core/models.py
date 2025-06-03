@@ -1,6 +1,5 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
-from django.db import transaction
 from django.conf import settings
 
 # Create your models here.
@@ -12,12 +11,12 @@ class Timer(models.Model):
 
 class CustomUser(AbstractUser):
     Roles=[
-        "boy":"boy",
-        "girl":"girl"
+        ("boy":"BOY"),
+        ("girl":"GIRL"),
     ]
-    role=models.CharField(choices="Roles", default="boy")
+    role=models.CharField(choices=Roles, default="boy")
     def __str__(self):
-        return f"{self.user.username} --{self.user.role}."
+        return f"{self.username} --{self.role}."
 
 class Note(Timer):
     notewriter=models.Foreignkey(CustomUser, on_delete=models.set_null, related_name="notewriter")
