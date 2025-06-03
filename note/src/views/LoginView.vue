@@ -1,24 +1,64 @@
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
+import { useUserStore } from '../stores/user'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
+import { useForm, useField } from 'vee-validate'
+import { defineRule } from 'vee-validate'
+import { required, min } from '@vee-validate/rules'
+
+defineRule('required', required)
+defineRule('min', min)
+
+export default defineComponent({
+  name: 'LoginView',
+  setup() {
+    const userStore = useUserStore()
+    const router = useRouter()
+    const toast = useToast()
+    const { handleSubmit, errors } = useForm()
+    const { value: username } = useField('username', 'required')
+    const { value: password } = useField('password', 'required|min:8')
+    const loading = ref(false)
+
+    const login = handleSubmit(async () => {
+      loading.value = true
+      try {
+        await userStore.login({ username: username.value, password: password.value })
+        toast.success('Logged in successfully')
+        router.push('/notes')
+      } catch (err: any) {
+        toast.error(err.message || 'Login failed')
+      } finally {
+        loading.value = false
+      }
+    })
+
+    return { username, password, login, errors, loading }
+  },
+})
+</script>
 <template>
   <div class="container mx-auto max-w-md p-4">
     <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">Login</h2>
-    <form @submit.prevent="login" class="space-y-4">
+    <form @submit="login" class="space-y-4">
       <div>
         <label class="block text-gray-700 dark:text-gray-300">Username</label>
         <input
-          v-model="form.username"
+          v-model="username"
           type="text"
           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-          required
         />
+        <p v-if="errors.username" class="text-red-500">{{ errors.username }}</p>
       </div>
       <div>
         <label class="block text-gray-700 dark:text-gray-300">Password</label>
         <input
-          v-model="form.password"
+          v-model="password"
           type="password"
           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-          required
         />
+        <p v-if="errors.password" class="text-red-500">{{ errors.password }}</p>
       </div>
       <button
         type="submit"
@@ -28,41 +68,5 @@
         {{ loading ? 'Logging in...' : 'Login' }}
       </button>
     </form>
-    <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { useUserStore } from '../stores/user'
-import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
-
-export default defineComponent({
-  name: 'LoginView',
-  setup() {
-    const userStore = useUserStore()
-    const router = useRouter()
-    const toast = useToast()
-    const form = ref({ username: '', password: '' })
-    const error = ref('')
-    const loading = ref(false)
-
-    const login = async () => {
-      loading.value = true
-      try {
-        await userStore.login(form.value)
-        toast.success('Logged in successfully')
-        router.push('/notes')
-      } catch (err: any) {
-        error.value = err.message || 'Login failed'
-        toast.error(error.value)
-      } finally {
-        loading.value = false
-      }
-    }
-
-    return { form, login, error, loading }
-  },
-})
-</script>
