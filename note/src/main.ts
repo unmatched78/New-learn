@@ -8,8 +8,6 @@ import Vue3Toastify from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css'; // Import the styles
 import './style.css'; // Your custom styles
 import 'flowbite'; // Assuming you’re using Flowbite
-import '@vueup/vue-quill/dist/vue-quill.snow.css'; // If you’re using Vue Quill
-
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
