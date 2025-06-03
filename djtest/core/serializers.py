@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Note
+
+User = get_user_model()  
+# serializers.py
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-User = get_user_model()  
-# serializers.py
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -15,10 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         max_length=128
     )
+    password2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'password',  'role']
+        fields = ['id', 'username', 'password', 'password2', 'role']
     
     def validate_password(self, value):
         try:
@@ -28,10 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(list(e.messages))
         return value
     
-    # def validate(self, attrs):
-    #     if attrs['password'] != attrs['password2']:
-    #         raise serializers.ValidationError({"password": "Passwords must match"})
-    #     return attrs
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Passwords must match"})
+        return attrs
     
     def create(self, validated_data):
         # Remove password2 before creating user
