@@ -21,10 +21,18 @@ export const useNotesStore = defineStore('notes', {
   actions: {
     async fetchNotes() {
       try {
+        console.log('Starting fetchNotes, token:', localStorage.getItem('access_token'))
         const response = await api.get<Note[]>('/notes/')
+        console.log('Fetch response:', response.status, response.data)
         this.notes = response.data
+        console.log('Updated notes:', this.notes)
       } catch (error) {
         const err = error as AxiosError<ErrorResponse>
+        console.error('Fetch error:', {
+            message: err.message,
+            response: err.response?.data,
+            status: err.response?.status
+        })
         throw err.response?.data?.error || { message: 'Failed to fetch notes' }
       }
     },
