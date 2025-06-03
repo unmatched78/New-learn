@@ -15,6 +15,7 @@ from .api.responses import error_response  # Import the helper
 User = get_user_model()
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    permission_classes = [permissions.AllowAny]
     def validate(self, attrs):
         try:
             # Call the base class to get the original tokens
