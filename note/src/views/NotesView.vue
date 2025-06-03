@@ -2,6 +2,12 @@
     <div class="container mx-auto p-4">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-primary dark:text-white">My Notes</h2>
+            <!-- <button
+                    @click="fetchNotes"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                    Refresh
+                </button> -->
             <button
                 @click="logout"
                 class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -9,6 +15,7 @@
                 Logout
             </button>
         </div>
+        
         <div class="mb-4">
             <textarea
                 v-model="newNote"
@@ -35,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import { useNotesStore } from '../stores/notes'
 import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
@@ -52,11 +59,15 @@ export default defineComponent({
         const newNote = ref('')
         const loading = ref(false)
 
+        const notes = computed(() => {
+            console.log('Computed notes:', notesStore.notes)
+            return notesStore.notes
+        })
+
         const fetchNotes = async () => {
             loading.value = true
             try {
                 await notesStore.fetchNotes()
-                console.log('Notes in store:', notesStore.notes)
             } catch (err: any) {
                 toast.error(err.message || 'Failed to fetch notes')
             } finally {
@@ -74,7 +85,6 @@ export default defineComponent({
                 await notesStore.createNote(newNote.value)
                 newNote.value = ''
                 toast.success('Note created successfully')
-                await fetchNotes() // Refresh notes after creation
             } catch (err: any) {
                 toast.error(err.message || 'Failed to create note')
             } finally {
@@ -90,7 +100,7 @@ export default defineComponent({
 
         onMounted(fetchNotes)
 
-        return { notes: notesStore.notes, newNote, createNote, logout, loading }
+        return { notes, newNote, createNote, logout, loading }
     },
 })
 </script>
