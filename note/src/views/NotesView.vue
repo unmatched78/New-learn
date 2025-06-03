@@ -40,7 +40,7 @@ import { defineComponent, ref, onMounted } from 'vue'
 import { useNotesStore } from '../stores/notes'
 import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
+import { toast } from 'vue3-toastify';
 import { QuillEditor } from '@vueup/vue-quill'
 import { PlusIcon } from '@heroicons/vue/24/solid'
 import NoteCard from '../components/NoteCard.vue'
