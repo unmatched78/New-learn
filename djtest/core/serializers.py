@@ -5,7 +5,7 @@ User = get_user_model()
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-
+from .models import *
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
