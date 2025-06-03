@@ -69,17 +69,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().handle_exception(exc)
 
 
-from rest_framework import viewsets, status, permissions
-from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from .models import Note
-from .serializers import NoteSerializer
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.exceptions import PermissionDenied
-from .api.responses import error_response
-
-User = get_user_model()
-
 class NoteViewSet(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     authentication_classes = [JWTAuthentication]
