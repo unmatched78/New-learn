@@ -1,5 +1,4 @@
 # core/views.py
-import logging
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny
@@ -10,33 +9,36 @@ from .models import *
 from .serializers import *
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         # Call the base class to get the original tokens
         data = super().validate(attrs)
-        # Attach your user info
-        data['user'] = {
-            'id':       self.user.id,
-            'username': self.user.username,
-            # add more fields as needed
+        
+        # Return the same structure as registration
+        return {
+            "tokens": {
+                "refresh": data["refresh"],
+                "access": data["access"]
+            },
+            "user": {
+                "id": self.user.id,
+                "username": self.user.username,
+                "role": self.user.role  # Add role to match registration
+            }
         }
-        return data
+    
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # Inject these claims into BOTH access & refresh tokens 
-        token['user_id']     = user.id
+        token['user_id'] = user.id
         return token
     
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -56,8 +58,6 @@ class NoteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically set notewriter to current user
         serializer.save(notewriter=self.request.user)
-
-from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

@@ -47,6 +47,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)  # Hashes the password
         user.save()
         return user
+
+class AuthResponseSerializer(serializers.Serializer):
+    tokens = serializers.DictField(child=serializers.CharField())
+    user = UserSerializer()
+
 class NoteSerializer(serializers.ModelSerializer):  
     notewriter = UserSerializer(read_only=True)  
     

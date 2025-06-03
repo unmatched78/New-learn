@@ -89,7 +89,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler'
 }
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
