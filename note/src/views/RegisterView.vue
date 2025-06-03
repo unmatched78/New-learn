@@ -62,7 +62,6 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore()
     const router = useRouter()
-    const toast = useToast()
     const form = ref({ username: '', password: '', password2: '', role: 'boy' })
     const error = ref('')
     const loading = ref(false)

@@ -51,7 +51,6 @@ export default defineComponent({
     const notesStore = useNotesStore()
     const userStore = useUserStore()
     const router = useRouter()
-    const toast = useToast()
     const newNote = ref('')
     const error = ref('')
     const loading = ref(false)

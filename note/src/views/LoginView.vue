@@ -15,7 +15,6 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore()
     const router = useRouter()
-    const toast = useToast()
     const { handleSubmit, errors } = useForm()
     const { value: username } = useField('username', 'required')
     const { value: password } = useField('password', 'required|min:8')

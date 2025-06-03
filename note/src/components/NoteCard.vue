@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue'
 import { useNotesStore } from '../stores/notes'
-import { useToast } from 'vue-toastification'
+import { toast } from 'vue3-toastify';
 import { QuillEditor } from '@vueup/vue-quill'
 import sanitizeHtml from 'sanitize-html'
 
@@ -15,7 +15,6 @@ export default defineComponent({
   },
   setup(props) {
     const notesStore = useNotesStore()
-    const toast = useToast()
     const isEditing = ref(false)
     const editContent = ref(props.note.content)
 
