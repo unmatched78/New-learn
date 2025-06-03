@@ -52,10 +52,26 @@ class AuthResponseSerializer(serializers.Serializer):
     tokens = serializers.DictField(child=serializers.CharField())
     user = UserSerializer()
 
-class NoteSerializer(serializers.ModelSerializer):  
-    notewriter = UserSerializer(read_only=True)  
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .models import Note
+from bleach import clean
+
+User = get_user_model()
+
+class NoteSerializer(serializers.ModelSerializer):
+    notewriter = serializers.SerializerMethodField()
     
     class Meta:
         model = Note
-        fields = ['id', 'notewriter', 'content', 'created_at', 'updated_at']  
-        read_only_fields = ['id', 'created_at', 'updated_at', 'notewriter']  
+        fields = ['id', 'notewriter', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'notewriter']
+
+    def get_notewriter(self, obj):
+        if obj.notewriter:
+            return {'id': obj.notewriter.id, 'username': obj.notewriter.username, 'role': obj.notewriter.role}
+        return None
+
+    def validate_content(self, value):
+        # Sanitize HTML content
+        return clean(value, tags=['p', 'b', 'i', 'u', 'strong', 'em', 'ul', 'li', 'ol'], attributes={})
