@@ -50,13 +50,6 @@ class AuthResponseSerializer(serializers.Serializer):
     tokens = serializers.DictField(child=serializers.CharField())
     user = UserSerializer()
 
-
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Note
-
-User = get_user_model()
-
 class NoteSerializer(serializers.ModelSerializer):
     notewriter = serializers.SerializerMethodField()
     
