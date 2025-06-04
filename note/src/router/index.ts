@@ -3,23 +3,24 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import NotesView from '../views/NotesView.vue'
+import { useUserStore } from '../stores/user'
 
 const routes = [
-  { path: '/', name: 'Home', component: HomeView },
-  { path: '/login', name: 'Login', component: LoginView },
-  { path: '/register', name: 'Register', component: RegisterView },
-  { path: '/notes', name: 'Notes', component: NotesView, meta: { requiresAuth: true } },
+  { path: '/', name: 'home', component: HomeView },
+  { path: '/login', name: 'login', component: LoginView },
+  { path: '/register', name: 'register', component: RegisterView },
+  { path: '/notes', name: 'notes', component: NotesView, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('access_token')
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
+  const userStore = useUserStore()
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
+    next({ name: 'login' })
   } else {
     next()
   }

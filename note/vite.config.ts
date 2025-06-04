@@ -7,6 +7,11 @@ export default defineConfig({
     vue(),
     tailwindcss(),
   ],
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
 })
 
 // https://vite.dev/config/
