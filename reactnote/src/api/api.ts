@@ -2,7 +2,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // 1) Create an Axios instance with your Django DRF backend base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -68,18 +68,18 @@ function processQueue(error: any, token: string | null = null) {
   failedQueue = [];
 }
 
+// … (keep all the code above)
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config!;
-    // If 401, and we have a refresh token, attempt to refresh once
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       getStoredRefreshToken()
     ) {
       if (isRefreshing) {
-        // Push this request into queue to be retried once refresh is done
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject, config: originalRequest });
         });
@@ -90,29 +90,26 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = getStoredRefreshToken()!;
-        // Call the refresh endpoint directly (we import auth.ts below)
-        const { data } = await api.post('/api/token/refresh/', {
+        // ← changed from "/api/token/refresh/" to "/token/refresh/"
+        const { data } = await api.post("/token/refresh/", {
           refresh: refreshToken,
         });
+
         const newAccessToken = data.access;
-        // Store new access token
         localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
         processQueue(null, newAccessToken);
         isRefreshing = false;
 
-        // Retry original request with new token
         originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        // If refresh failed (e.g. refresh token expired), clear tokens
         clearTokens();
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );

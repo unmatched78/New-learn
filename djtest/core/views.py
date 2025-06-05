@@ -3,6 +3,8 @@ from rest_framework import viewsets, status, generics, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from .models import *
 from .serializers import *
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -57,6 +59,11 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
     def handle_exception(self, exc):
         # Custom exception handling for UserViewSet

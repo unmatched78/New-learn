@@ -1,5 +1,5 @@
 // src/api/auth.ts
-import api, { storeTokens, clearTokens } from './api';
+import api, { storeTokens, clearTokens } from "./api";
 
 export interface LoginCredentials {
   username: string;
@@ -11,55 +11,59 @@ export interface TokenPair {
   refresh: string;
 }
 
+// (Optional) shape of the user object your backend returns
 export interface UserData {
   id: number;
   username: string;
-  email?: string;
-  // …any other fields your DRF serializer returns
+  role: string;
+  // …any other fields you need
 }
 
-// 1) Login: POST /api/token/ → { access, refresh }
+// ─── 1) LOGIN: POST /api/auth/token/login/ ───────────────────────────────────────
 export async function loginUser(
   creds: LoginCredentials
 ): Promise<TokenPair> {
-  const response = await api.post<TokenPair>('/api/token/', {
+  // Note: if VITE_API_BASE_URL = "http://localhost:8000/api",
+  // then this actually POSTs to "http://localhost:8000/api/auth/token/login/"
+  const response = await api.post<{
+    tokens: { access: string; refresh: string };
+    user: any;
+  }>("/auth/token/login/", {
     username: creds.username,
     password: creds.password,
   });
-  const { access, refresh } = response.data;
+
+  const { access, refresh } = response.data.tokens;
   storeTokens(access, refresh);
   return { access, refresh };
 }
 
-// 2) Register: POST /api/register/ → { access, refresh } (or just a success message)
-//    Here we assume registration endpoint returns tokens directly. If yours only returns
-//    a user object, you can then call loginUser() afterward.
+// ─── 2) REGISTER: POST /api/register/ ────────────────────────────────────────────
 export async function registerUser(
   creds: LoginCredentials
 ): Promise<TokenPair> {
-  // Adjust this URL if your DRF URL is something like /api/users/register/ or similar
-  const response = await api.post<TokenPair>('/api/register/', {
+  // If your DRF RegisterView returns { tokens: { access, refresh }, user: { … } }
+  const response = await api.post<{
+    tokens: { access: string; refresh: string };
+    user: any;
+  }>("/register/", {
     username: creds.username,
     password: creds.password,
   });
 
-  // If your backend returns { access, refresh } right away:
-  const { access, refresh } = response.data;
+  const { access, refresh } = response.data.tokens;
   storeTokens(access, refresh);
   return { access, refresh };
-
-  // If your backend only returns a “user created” message, do this instead:
-  // await api.post('/api/register/', { username: creds.username, password: creds.password });
-  // return loginUser(creds);
 }
 
-// 3) Logout: just clear tokens on client side
+// ─── 3) LOGOUT: just clear tokens on client ───────────────────────────────────────
 export function logoutUser() {
   clearTokens();
 }
 
-// 4) Fetch current user: GET /api/users/me/ (protected by JWTAuthentication)
+// ─── 4) FETCH CURRENT USER: GET /api/users/me/ ───────────────────────────────────
 export async function fetchCurrentUser(): Promise<UserData> {
-  const response = await api.get<UserData>('/api/users/me/');
+  // Be sure you add a “/api/users/me/” URL on the Django side (see below).
+  const response = await api.get<UserData>("/users/me/");
   return response.data;
 }
