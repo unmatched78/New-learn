@@ -1,45 +1,36 @@
 // src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import PrivateRoute from './components/PrivateRoute';
-import LoginPage from './pages/LoginPage';
-import NotesPage from './pages/NotesPage';
-import RegisterPage from './pages/RegisterPage';
-// Import the AuthContext to access user state
 import { useAuth } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import NotesPage from './pages/NotesPage';
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
-  // Optionally, if you want to prevent even reaching the login screen
-  // if someone is already logged in, you can decide here to redirect from /login → /notes.
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public login route */}
+        {/* Landing is public */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* If already logged in, redirect /login → /notes */}
         <Route
           path="/login"
-          element={
-            // If user is already logged in, redirect to /notes
-            user ? (
-              <Navigate to="/notes" replace />
-            ) : (
-              <LoginPage />
-            )
-          }
+          element={user ? <Navigate to="/notes" replace /> : <LoginPage />}
         />
-        {/* for register page */}
+
+        {/* If already logged in, redirect /register → /notes */}
         <Route
           path="/register"
-          element={
-            // If user is already logged in, redirect to /notes
-            user ? (
-              <Navigate to="/notes" replace />
-            ) : (
-              <RegisterPage isRegister={true} />
-            )
-          }/>
-        {/* All routes inside <Route element={<PrivateRoute>…</PrivateRoute>}> become protected */}
+          element={user ? <Navigate to="/notes" replace /> : <RegisterPage />}
+        />
+
+        {/* Protected /notes */}
         <Route
           path="/notes"
           element={
@@ -49,12 +40,7 @@ function App() {
           }
         />
 
-        {/* You can add more protected routes here:
-            <Route path="/profile" element={<PrivateRoute><ProfilePage/></PrivateRoute>} />
-            <Route path="/settings" element={<PrivateRoute><SettingsPage/></PrivateRoute>} />
-        */}
-
-        {/* If user hits any other path, you might redirect them: */}
+        {/* Catch-all redirects to either /notes or /login */}
         <Route
           path="*"
           element={<Navigate to={user ? '/notes' : '/login'} replace />}
