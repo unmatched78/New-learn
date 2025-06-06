@@ -83,7 +83,18 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
-    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+    "DEFAULT_THROTTLE_CLASSES": [
+        # If you want to apply a default throttle to all unauthenticated requests,
+        # you can leave AnonRateThrottle in here. In our case, we’ll only throttle login.
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        # 5 requests per minute for any view that uses the "login" scope
+        "login": "5/min",
+        # (you can keep other defaults here—for example, a generic "anon" throttle)
+        "anon": "100/hour",
+    },
 }
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

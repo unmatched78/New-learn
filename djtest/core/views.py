@@ -19,7 +19,8 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from .api.responses import error_response
 from rest_framework.exceptions import PermissionDenied
-
+# Import our custom throttle
+from .throttles import LoginRateThrottle
 # Import Celery task
 from .tasks import mark_note_as_old
 
@@ -58,6 +59,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    throttle_classes = [LoginRateThrottle]
 
 
 class UserViewSet(viewsets.ModelViewSet):
