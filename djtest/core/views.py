@@ -111,6 +111,7 @@ class NoteViewSet(viewsets.ModelViewSet):
             )
         return super().handle_exception(exc)
 
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
