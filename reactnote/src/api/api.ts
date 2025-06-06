@@ -68,8 +68,6 @@ function processQueue(error: any, token: string | null = null) {
   failedQueue = [];
 }
 
-// … (keep all the code above)
-
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
