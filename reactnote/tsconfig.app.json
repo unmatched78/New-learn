@@ -10,11 +10,13 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    //"verbatimModuleSyntax": true,
+    //for cmpatibility with docker
+    "verbatimModuleSyntax": false,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
+    "types": ["vite/client", "react"],
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

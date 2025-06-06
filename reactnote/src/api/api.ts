@@ -1,6 +1,7 @@
 // src/api/api.ts
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-
+//import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError } from "axios";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";//compatibilty with docker
 // 1) Create an Axios instance with your Django DRF backend base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -34,16 +35,20 @@ export function clearTokens() {
 }
 
 // 3) Request interceptor: attach access token to every request
+import type { InternalAxiosRequestConfig } from "axios";
+
 api.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = getStoredAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // TS now understands you're returning an InternalAxiosRequestConfig
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 // 4) Response interceptor: if we get a 401 (access expired), try to refresh
 let isRefreshing = false;

@@ -1,5 +1,4 @@
 // src/pages/LandingPage.tsx
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ModeToggle } from '@/components/mode-toggle';
