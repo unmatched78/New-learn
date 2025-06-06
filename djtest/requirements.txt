@@ -10,3 +10,7 @@ python-dotenv
 django-redis
 redis
 celery
+django-celery-beat
+django-celery-results
+gunicorn
+whitenoise
