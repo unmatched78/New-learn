@@ -14,7 +14,7 @@ export default function LandingPage() {
       <div className="text-center space-y-6">
         <h1 className="text-5xl font-extrabold">Welcome to ReactNote</h1>
         <p className="text-xl text-gray-600">
-          Your personal note-taking app built with React and Django.
+          Your personal note-taking app built for you!
         </p>
         <div className="space-x-4">
           <Button
