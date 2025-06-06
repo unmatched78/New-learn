@@ -1,0 +1,12 @@
+django
+django-debug-toolbar
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+django-cors-headers
+django-filter
+django-environ
+python-dotenv
+django-redis
+redis
+celery
