@@ -1,2 +1,9 @@
 django-tenants 
 django-tenant-users
+django
+django-restframework
+django-restframework-simplejwt
+python-dotenv
+python-decouple
+django-cors-header
+django-filters
