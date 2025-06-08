@@ -73,6 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.core.middleware.TimezoneMiddleware',
     'apps.core.middleware.AuditMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -324,6 +325,8 @@ LOGGING = {
     },
 }
 
+# API Configuration
+API_VERSION = 'v1'
 # Custom HRMIS Settings
 HRMIS_SETTINGS = {
     'COMPANY_NAME': config('COMPANY_NAME', default='HRMIS System'),
