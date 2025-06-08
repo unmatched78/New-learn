@@ -1,63 +1,74 @@
 # apps/core/middleware.py
+import logging
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
 from django.contrib.auth.models import AnonymousUser
-from apps.core.managers import set_current_tenant, set_current_user
-from apps.core.models import AuditLog
 import pytz
 
+from apps.core.managers import set_current_tenant, set_current_user
+from apps.core.models import AuditLog
+
+logger = logging.getLogger(__name__)
+
 class TimezoneMiddleware(MiddlewareMixin):
-    """Middleware to set timezone based on user preference"""
-    
+    """Middleware to set timezone based on authenticated user's preference."""
+
     def process_request(self, request):
-        if request.user.is_authenticated:
-            user_timezone = getattr(request.user, 'timezone', None)
-            if user_timezone:
-                timezone.activate(pytz.timezone(user_timezone))
-            else:
-                timezone.deactivate()
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            user_tz = getattr(user, 'timezone', None)
+            if user_tz:
+                try:
+                    timezone.activate(pytz.timezone(user_tz))
+                except Exception:
+                    logger.warning(f"Invalid timezone {user_tz}, deactivating.")
+                    timezone.deactivate()
+                return
+        # Default fallback
+        timezone.deactivate()
 
 class AuditMiddleware(MiddlewareMixin):
-    """Middleware to create audit logs for requests"""
-    
+    """Middleware to set thread-local context and log audit entries for API calls."""
+
     def process_request(self, request):
-        # Set current user in thread local
-        if hasattr(request, 'user') and not isinstance(request.user, AnonymousUser):
-            set_current_user(request.user)
-        
-        # Set current tenant in thread local
-        if hasattr(request, 'tenant'):
-            set_current_tenant(request.tenant)
-    
+        # Set user context
+        user = getattr(request, 'user', None)
+        if user and not isinstance(user, AnonymousUser):
+            set_current_user(user)
+
+        # Set tenant context
+        tenant = getattr(request, 'tenant', None)
+        if tenant:
+            set_current_tenant(tenant)
+
     def process_response(self, request, response):
-        # Log API requests
-        if (request.path.startswith('/api/') and 
-            hasattr(request, 'user') and 
-            not isinstance(request.user, AnonymousUser) and
-            hasattr(request, 'tenant')):
-            
-            # Only log certain methods
-            if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
-                try:
-                    AuditLog.objects.create(
-                        tenant=request.tenant,
-                        user=request.user,
-                        action='API_CALL',
-                        description=f"{request.method} {request.path}",
-                        ip_address=self.get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                        changes={'status_code': response.status_code}
-                    )
-                except Exception:
-                    pass  # Don't break request if audit log fails
-        
+        try:
+            user = getattr(request, 'user', None)
+            tenant = getattr(request, 'tenant', None)
+
+            is_api = request.path.startswith('/api/')
+            valid_user = user and not isinstance(user, AnonymousUser)
+            if is_api and valid_user and tenant and request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+                AuditLog.objects.create(
+                    tenant=tenant,
+                    user=user,
+                    action='API_CALL',
+                    description=f"{request.method} {request.get_full_path()}",
+                    ip_address=self.get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    changes={'status_code': response.status_code}
+                )
+        except Exception:
+            logger.error("Failed to create audit log", exc_info=True)
+
         return response
-    
+
     def get_client_ip(self, request):
-        """Get client IP address"""
+        """Retrieve the client's IP address from the request."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
+            # X-Forwarded-For may contain multiple IPs, take the first
+            ip = x_forwarded_for.split(',')[0].strip()
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
