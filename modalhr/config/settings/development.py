@@ -80,16 +80,47 @@ CACHES = {
     }
 }
 
-# Alternative Redis cache for development (if you have Redis running)
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': 'redis://localhost:6379/1',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
+#redis settings
+
+# settings.py (below the imports)
+
+REDIS_URL = os.getenv("REDIS_URL")
+# e.g. "rediss://:mypassword@redis-12345.c10.us-west-2-2.ec2.cloud.redislabs.com:6379/0"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # If your REDIS_URL does not embed the password,
+            # you can specify it here instead:
+            # "PASSWORD": get_env_variable("REDIS_PASSWORD"),
+        },
+    }
+}
+
+# Immediately print/log the Redis URL so you see it on startup
+print(f"[Django] Using Redis cache at: {REDIS_URL!r}")
+# (Optional) Use Redis for session storage
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+#celery settings
+# settings.py (continued)
+
+# ─── Celery Configuration ─────────────────────────────────────────────────────
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+
+# (Optional) If you want task results to expire after, say, 1 hour:
+CELERY_TASK_RESULT_EXPIRES = 60 * 60  # seconds
+
+# You can also add any Celery‐specific settings you need:
+# CELERY_ACCEPT_CONTENT = ["json"]
+# CELERY_TASK_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"
+# CELERY_TIMEZONE = "UTC"
 
 # Development Celery Configuration
 CELERY_TASK_ALWAYS_EAGER = True  # Execute tasks synchronously in development
@@ -227,9 +258,9 @@ FIXTURE_DIRS = [
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025  # For local SMTP server like MailHog
 EMAIL_USE_TLS = False
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+import sys
 # Development testing database
 if 'test' in sys.argv:
     DATABASES['default'] = {
