@@ -72,13 +72,6 @@ SECURE_BROWSER_XSS_FILTER = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-# Development Cache Configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'hrmis-dev-cache',
-    }
-}
 
 #redis settings
 
@@ -294,7 +287,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 4,  # Shorter for development
+            'min_length': 3,  # Shorter for development
         }
     },
 ]
