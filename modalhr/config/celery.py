@@ -1,18 +1,34 @@
-# djtest/celery.py
-
 import os
 from celery import Celery
+from celery.schedules import crontab
+from django.conf import settings
 
-# 1) Set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djtest.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-# 2) Instantiate Celery; the first argument (
-#    name) is usually the project name.
-app = Celery("djtest")
-
-# 3) Load broker and backend settings from Django settings,
-#    using a CELERY_ prefix. (We put those in settings.py above.)
-app.config_from_object("django.conf:settings", namespace="CELERY")
-
-# 4) Autodiscover tasks from all INSTALLED_APPS (looks for tasks.py in each)
+app = Celery('hrmis')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+
+# Periodic tasks
+app.conf.beat_schedule = {
+    'process-monthly-payroll': {
+        'task': 'apps.hr_modules.payroll.tasks.process_monthly_payroll',
+        'schedule': crontab(day_of_month=25, hour=3, minute=0),
+    },
+    'send-notification-reminders': {
+        'task': 'apps.core.tasks.send_daily_reminders',
+        'schedule': crontab(hour=9, minute=0),
+    },
+    'check-document-expiry': {
+        'task': 'apps.hr_modules.employees.tasks.check_document_expiry',
+        'schedule': crontab(hour=6, minute=0),
+    },
+    'sync-integrations': {
+        'task': 'apps.integrations.tasks.sync_all',
+        'schedule': crontab(minute='*/30'),
+    }
+}
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
