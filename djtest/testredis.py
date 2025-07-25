@@ -4,11 +4,11 @@
 import redis
 
 r = redis.Redis(
-    host='redis-17038.c341.af-south-1-1.ec2.redns.redis-cloud.com',
+    host='xxxx.com',
     port=17038,
     decode_responses=True,
     username="default",
-    password="dy2LDCKKD0z3c0T1FB66RtIN4piEuTqR",
+    password="your-password",
 )
 
 success = r.set('foo', 'bar')
